@@ -76,7 +76,7 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
 
         ```{r, eval=FALSE}
         require(quanteda)
-        manfiles <- readtext("https://github.com/lse-me314/assignment09/raw/master/UKimmigTexts.zip")
+        manfiles <- readtext("https://github.com/lse-me314/assignment09/blob/master/UKimmigTexts.zip?raw=true")
         mycorpus <- corpus(manfiles)
         ```
    
