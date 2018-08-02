@@ -1,5 +1,5 @@
 ---
-title: "Assignment 9 - Working With Textual Data"
+title: "ME314: Assignment 9"
 author: "Jack Blumenau"
 output: html_document
 ---
