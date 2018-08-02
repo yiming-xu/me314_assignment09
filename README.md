@@ -9,7 +9,7 @@ Work with the file [ME314-assignment9-LASTNAME-FIRSTNAME.Rmd](ME314-assignment9-
 <!--
 ### Solutions
  
-Solution to Assignment 3 as:
-*  [html](me314-assignment3-solution.html) 
-*  [RMarkdown](me314-assignment3-solution.Rmd)  
+Solution to Assignment 9 as:
+*  [html](ME314_assignment9_solution.html) 
+*  [RMarkdown](ME314_assignment9_solution.Rmd)  
 --> 
