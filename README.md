@@ -4,7 +4,8 @@ You should clone this repository to get started with this lab.  The URL to clone
 
 ### Assignment
 
-Work with the file [ME314-assignment9-LASTNAME-FIRSTNAME.Rmd](ME314-assignment9-LASTNAME-FIRSTNAME.Rmd).
+* [Rmarkdown](ME314-assignment9-LASTNAME-FIRSTNAME.Rmd).
+* [html](ME314-assignment9-LASTNAME-FIRSTNAME.html)
 
 <!--
 ### Solutions
