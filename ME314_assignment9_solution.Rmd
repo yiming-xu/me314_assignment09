@@ -1,5 +1,5 @@
 ---
-title: "ME314: Assignment 9"
+title: "Assignment 9 - Working With Textual Data (Solutions)"
 author: "Jack Blumenau"
 output: html_document
 ---
@@ -19,7 +19,7 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
     
     You will also need to install the package `quanteda.corpora` from github using the `install_github` function from the `devtools` package: 
     ```{r, eval=FALSE}
-    devtools::install_github('quanteda/quanteda.corpora')
+    devtools::install_github('kbenoit/quanteda.corpora')
     ```
     
     
@@ -59,6 +59,11 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         description of the corpus.  The names of the corpus `data_char_ukimmig2010` should
         have become the document names.
 
+        ```{r}
+        immig_corpus <- corpus(data_char_ukimmig2010)
+        summary(immig_corpus)
+        ```
+
       
     1.  From a directory of text files.
    
@@ -68,7 +73,7 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
       
         Here you are encouraged to select any directory of plain text files of your own.  
         How did it work?  Try using `docvars()` to assign a set of document-level variables.
-        If you do not have a set of text files to work with, then you can use the UK 2010 manifesto texts on immigration, in the Assignment 9 folder, like this:
+        If you do not have a set of text files to work with, then you can use the UK 2010 manifesto texts on immigration, in the Day 8 folder, like this:
       
         ```{r, echo=FALSE}
         library("quanteda", quietly = TRUE, warn.conflicts = FALSE)
@@ -76,7 +81,7 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
 
         ```{r, eval=FALSE}
         require(quanteda)
-        manfiles <- readtext("https://github.com/lse-me314/assignment09/blob/master/UKimmigTexts.zip?raw=true")
+        manfiles <- readtext("https://github.com/kbenoit/ME114/raw/master/day8/UKimmigTexts.zip")
         mycorpus <- corpus(manfiles)
         ```
    
@@ -96,6 +101,14 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
 
     Try substituting your own search terms, or working with your own corpus.
 
+    ```{r, eval = T}
+
+    head(kwic(data_corpus_inaugural, "america", 3))
+
+    head(kwic(data_corpus_inaugural, "democracy", 3))
+    ```
+
+
 1.  Create a document-feature matrix, using `dfm`.  First, read the documentation using
     `?dfm` to see the available options.
    
@@ -107,6 +120,11 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
    
     Experiment with different `dfm` options, such as `stem = TRUE`.  The function `dfm_trim()` 
     allows you to reduce the size of the dfm following its construction.
+    
+    ```{r}
+    dim(dfm(data_corpus_inaugural, stem = T))
+    dim(dfm_trim(mydfm, min_termfreq = 5, min_docfreq = 0.01, termfreq_type = "count", docfreq_type = "prop"))
+    ```
    
     Grouping on a variable is an excellent feature of `dfm()`, in fact one of my favorites.  
     For instance, if you want to aggregate all speeches by presidential name, you can execute
@@ -116,12 +134,19 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
     mydfm
     docnames(mydfm)
     ```
-    
     Note that this groups Theodore and Franklin D. Roosevelt together -- to separate them we
     would have needed to add a firstname variable using `docvars()` and grouped on that as well.
    
     Do this to aggregate the Irish budget corpus (`data_corpus_irishbudget2010`) by political party, when
     creating a dfm.
+
+    ```{r}
+    mydfm <- dfm(data_corpus_inaugural, remove = stopwords("english"), remove_punct = T, stem = T)
+    topfeatures(mydfm, 20)
+
+    irish_dfm <- dfm(data_corpus_irishbudget2010, groups = "party")
+    
+    ```
 
 
 1.  Explore the ability to subset a corpus.  
@@ -138,6 +163,11 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
     Try producing that plot without the stopwords.  See `dfm_remove()` to remove stopwords from the dfm object directly, or supply
     the `remove` argument to `dfm()`.
 
+    ```{r}
+    obamadfm <- dfm(corpus_subset(data_corpus_inaugural, President=="Obama"), remove = stopwords("english"), remove_punct = T)
+    textplot_wordcloud(obamadfm)
+    ```
+
 
 1.  **Preparing and pre-processing texts**
 
@@ -150,6 +180,10 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         **quanteda.corpora** using `data(data_char_sampletext)`. Can you think of cases 
         where cleaning could introduce homonymy?
 
+        ```{r, eval = T}
+        sample_text_lowercase <- char_tolower(data_char_sampletext)
+        ```
+
 
     1.  Tokenizing texts
 
@@ -158,12 +192,51 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         documentation for **quanteda**'s `tokens()` function.  Use the 
         `tokens` command on `data_char_sampletext`, and examine the results.  Are 
         there cases where it is unclear where the boundary between two words lies?
-        You can experiment with the options to `tokens`.
+        You can experiment with the options to `tokens`.  
+        
+        Try tokenizing the sentences from `data_char_sampletext` into sentences, using
+        `tokens(x, what = "sentence")`. 
+
+        ```{r, eval = F}
+        tokens(sample_text_lowercase)
+        tokens(sample_text_lowercase, remove_hyphens = T)
+        tokens(sample_text_lowercase, remove_numbers = T, remove_punct = T, remove_symbols = T)
+        ```
+        
+        ```{r, eval = T}
+        tokens(sample_text_lowercase, what = "sentence")
+        ```
         
     1.  Stemming.
     
         Stemming removes the suffixes using the Porter stemmer, found in the
         **SnowballC** library.  The **quanteda** function* to invoke the stemmer end with  `*_wordstem`.  Apply stemming to the `data_char_sampletext` (using `char_wordstem()`) and examine the results.  Why does it not appear to work, and what do you need to do to make it work?  How would you apply this to the sentence-segmented vector?
+
+        ```{r, eval = T}
+        
+        # Word-segmented vector
+        sample_word_stems <- char_wordstem(tokens(data_char_sampletext)[[1]])
+        sample_word_stems[1:10]
+        
+        ```
+
+        ```{r, eval = T}
+        # Sentence-segmented vector
+        
+        sentence_boundaries <- c(0, which(sample_word_stems == "."))
+        
+        sample_sentence_word_stems <- list()
+        
+        for(i in 1:(length(sentence_boundaries)-1)) {
+        
+        sample_sentence_word_stems[[i]] <- paste0(sample_word_stems[(sentence_boundaries[i] + 1):(sentence_boundaries[i+1])], collapse = " ")
+        
+        }
+        
+        sample_sentence_word_stems[1:3]
+        
+        
+        ```
 
 
     1.  Applying "pre-processing" to the creation of a `dfm`.
@@ -188,12 +261,11 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         Inspect the dimensions of the resulting objects, including the names of the words extracted as features.  It is also worth comparing the structure of the document-feature matrixes returned by each package.  **tm** uses the [slam](http://cran.r-project.org/web/packages/slam/index.html) *simple triplet matrix* format for representing a [sparse matrix](http://en.wikipedia.org/wiki/Sparse_matrix).
         
         It is also -- in fact almost always -- useful to inspect the structure of this object:
-       
         ```{r}
         str(tdm)
         ```
 
-        This indicates that we can extract the names of the words from the **tm** TermDocumentMatrix object by getting the rownames from inspecting the tdm:
+        THis indicates that we can extract the names of the words from the **tm** TermDocumentMatrix object by getting the rownames from inspecting the tdm:
         ```{r}
         head(tdm$dimnames$Terms, 20)
         ```
@@ -229,13 +301,28 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         object by clicking on it in the environment
         pane in RStudio (or using the inspection method of your choice).
 
+        ```{r}
+        northern_kwic <- kwic(data_corpus_irishbudget2010, "Northern")
+        class(northern_kwic) # Class  = data.frame or kwic object
+        ```
+
 
     4.  Use the `kwic` function to discover the context of the word
         "clean".  Is this associated with environmental policy?
 
+        ```{r}
+        clean_kwic <- kwic(data_corpus_irishbudget2010, "clean") # No, more like corruption!
+        print(clean_kwic)
+        ```
+
+
     5.  By default, kwic explores all words related to the word, since it interprets the
         pattern as a "regular expression".  What if we wanted to see only the literal, 
         entire word "disaster"?  Hint: Look at the arguments using `?kwic`.
+
+        ```{r}
+        disaster_kwic <- kwic(data_corpus_irishbudget2010, "disaster", valuetype = "fixed")
+        ```
 
 
 1.  **Descriptive statistics**
@@ -244,8 +331,17 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         its document feature matrix.  Make a dfm from the 2010 Irish budget 
         speeches corpus.
 
+        ```{r}
+        irish_dfm <- dfm(data_corpus_irishbudget2010, remove_punct = T)
+        ```
+
     1.  Examine the most frequent word features using `textstat_frequency()`.  What are
         the five most frequent word in the corpus?  (Note: There is a also a `topfeatures()` command that works in a similar way.)
+        
+        ```{r}
+        head(textstat_frequency(irish_dfm), 5)
+        topfeatures(irish_dfm,5)
+        ```
 
 
     5.  **quanteda** provides a function to count syllables in a
@@ -262,6 +358,10 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         ```
         
         How would you get the total syllables per text?
+        ```{r}
+        print(textsyls)
+        ```
+
         
 3.  **Lexical Diversity over Time**
 
@@ -278,7 +378,15 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         Note the quotation marks around the value for `number`.  Why are these required here?
 
     2.  Get the type-token ratio for each text from this subset, and
-        plot the resulting vector of TTRs as a function of the year.  Hint: See `?textstat_lexdiv`.
+        plot the resulting vector of TTRs as a function of the year.  Hint: See `?textstat_lexdiv`.        
+
+        ```{r}
+        finMins_dfm <- dfm(finMins)
+        ttr_by_speech <- textstat_lexdiv(finMins_dfm, "TTR")
+
+        plot(docvars(finMins)$year, ttr_by_speech$TTR, main = "TTR by year", xlab = "Year", ylab = "TTR", pch = 19, bty = "n", type = "b")
+
+        ```
 
 
 4.  **Document and word associations**
@@ -288,6 +396,18 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
 
     2.  Measure the term similarities (`textstat_simil`) for the following words: *economy*, *health*,
         *women*. Which other terms are most associated with each of these three terms?
+        
+        ```{r}
+        data_corpus_inaugural_subset <- corpus_subset(data_corpus_inaugural, Year %in% c(1900:1950))
+        inaugural_dfm <- dfm(data_corpus_inaugural_subset, remove_punct = T)
+
+        word_similarities <- textstat_simil(inaugural_dfm, selection = c("economy", "health", "women"), margin = "features")
+
+        head(word_similarities[order(word_similarities[,1],decreasing = T),])
+        head(word_similarities[order(word_similarities[,2],decreasing = T),])
+        head(word_similarities[order(word_similarities[,3],decreasing = T),])
+
+        ```
 
 1.  **Working with dictionaries**
 
@@ -316,8 +436,21 @@ This exercise is designed to get you working with [quanteda](https://quanteda.io
         Is the distribution of normalized articles and conjunctions relatively constant across
         years, as you would expect?
 
+        ```{r}
+        par(mfrow = c(1,2))
+        plot(docvars(data_corpus_inaugural)$Year, as.numeric(posDfm[,1]))
+        plot(docvars(data_corpus_inaugural)$Year, as.numeric(posDfm[,2]))
+        ```
+
+
 1.  Settle a Scrabble word value dispute.
 
     Look up the Scrabble values of "aerie" and "queue".  And ask yourself how can an English word have five letters and just one consonant?? It's downright **eerie**.
     
     Hint:  The function is `nscrabble()`.
+    ```{r}
+    nscrabble("aerie")
+    nscrabble("queue")
+
+    ```
+
